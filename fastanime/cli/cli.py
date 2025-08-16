@@ -101,7 +101,7 @@ def cli(ctx: click.Context, **options: "Unpack[Options]"):
 
     loader = ConfigLoader(config_path=USER_CONFIG)
     config = (
-        AppConfig.model_validate(cli_overrides)
+        AppConfig(**cli_overrides)
         if options["no_config"]
         else loader.load(cli_overrides)
     )

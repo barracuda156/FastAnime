@@ -110,7 +110,7 @@ def search(
             return
 
         if output_json:
-            print(json.dumps(result.model_dump(mode="json"), indent=2))
+            print(result.json(indent=2))
             return
 
         _display_search_results(console, result, config.general.icons)

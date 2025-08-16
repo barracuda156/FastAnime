@@ -83,7 +83,7 @@ def play_downloads(ctx: Context, state: State) -> State | InternalDirective:
     return State(
         menu_name=MenuName.DOWNLOADS_PLAYER_CONTROLS,
         media_api=state.media_api,
-        provider=state.provider.model_copy(
+        provider=state.provider.copy(
             update={"episode": chosen_episode, "start_time": start_time}
         ),
     )
@@ -154,7 +154,7 @@ def downloads_player_controls(
         return State(
             menu_name=MenuName.DOWNLOADS_PLAYER_CONTROLS,
             media_api=state.media_api,
-            provider=state.provider.model_copy(
+            provider=state.provider.copy(
                 update={"episode": next_episode_num, "start_time": None}
             ),
         )
@@ -229,7 +229,7 @@ def _next_episode(ctx: Context, state: State) -> MenuAction:
             return State(
                 menu_name=MenuName.DOWNLOADS_PLAYER_CONTROLS,
                 media_api=state.media_api,
-                provider=state.provider.model_copy(
+                provider=state.provider.copy(
                     update={"episode": next_episode_num, "start_time": None}
                 ),
             )
@@ -278,7 +278,7 @@ def _previous_episode(ctx: Context, state: State) -> MenuAction:
             return State(
                 menu_name=MenuName.DOWNLOADS_PLAYER_CONTROLS,
                 media_api=state.media_api,
-                provider=state.provider.model_copy(
+                provider=state.provider.copy(
                     update={"episode": prev_episode_num, "start_time": None}
                 ),
             )

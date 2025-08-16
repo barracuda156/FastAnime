@@ -5,8 +5,6 @@ from typing import Any, Literal, Optional, get_args, get_origin
 
 import click
 from pydantic import BaseModel
-from pydantic.fields import FieldInfo
-from pydantic_core import PydanticUndefined
 
 from ..core.config.model import OtherConfig
 
@@ -53,11 +51,11 @@ def options_from_model(model: type[BaseModel], parent_name: str = "") -> Callabl
     model_name = model.__name__.lower().replace("config", "")
 
     # Introspect the model's fields
-    for field_name, field_info in model.model_fields.items():
+    for field_name, field_info in model.__fields__.items():
         if isinstance(field_info.annotation, type) and issubclass(
-            field_info.annotation, BaseModel
+            field_info.type_, BaseModel
         ):
-            nested_decorators = options_from_model(field_info.annotation, field_name)
+            nested_decorators = options_from_model(field_info.type_, field_name)
             nested_decorator_list = getattr(nested_decorators, "decorators", [])
             decorators.extend(nested_decorator_list)
             continue
@@ -68,17 +66,17 @@ def options_from_model(model: type[BaseModel], parent_name: str = "") -> Callabl
             cli_name = f"--{field_name.replace('_', '-')}"
         kwargs = {
             "type": _get_click_type(field_info),
-            "help": field_info.description or "",
+            "help": field_info.field_info.description or "",
         }
 
         if (
-            field_info.annotation is not None
-            and isinstance(field_info.annotation, type)
-            and issubclass(field_info.annotation, Enum)
+            field_info.type_ is not None
+            and isinstance(field_info.type_, type)
+            and issubclass(field_info.type_, Enum)
         ):
-            kwargs["default"] = field_info.default.value
-        elif field_info.annotation is bool:
-            if field_info.default is not PydanticUndefined:
+            kwargs["default"] = field_info.default.value if field_info.default is not None else None
+        elif field_info.type_ is bool:
+            if field_info.default is not None:
                 kwargs["default"] = field_info.default
                 kwargs["show_default"] = True
             if is_external_tool:
@@ -87,30 +85,9 @@ def options_from_model(model: type[BaseModel], parent_name: str = "") -> Callabl
                 )
             else:
                 cli_name = f"{cli_name}/--no-{field_name.replace('_', '-')}"
-        elif field_info.default is not PydanticUndefined:
+        elif field_info.default is not None:
             kwargs["default"] = field_info.default
             kwargs["show_default"] = True
-
-        decorators.append(
-            click.option(
-                cli_name,
-                cls=ConfigOption,
-                model_name=model_name,
-                field_name=field_name,
-                **kwargs,
-            )
-        )
-
-    for field_name, computed_field_info in model.model_computed_fields.items():
-        if is_external_tool:
-            cli_name = f"--{model_name}-{field_name.replace('_', '-')}"
-        else:
-            cli_name = f"--{field_name.replace('_', '-')}"
-
-        kwargs = {
-            "type": TYPE_MAP[computed_field_info.return_type],
-            "help": computed_field_info.description or "",
-        }
 
         decorators.append(
             click.option(
@@ -133,9 +110,9 @@ def options_from_model(model: type[BaseModel], parent_name: str = "") -> Callabl
     return decorator
 
 
-def _get_click_type(field_info: FieldInfo) -> Any:
+def _get_click_type(field_info) -> Any:
     """Maps a Pydantic field's type to a corresponding click type."""
-    field_type = field_info.annotation
+    field_type = field_info.type_
 
     # check if type is enum
     if (
@@ -158,16 +135,16 @@ def _get_click_type(field_info: FieldInfo) -> Any:
             return click.Choice(args)
 
     # Check for examples in field_info - use as choices
-    if hasattr(field_info, "examples") and field_info.examples:
-        return click.Choice(field_info.examples)
+    if hasattr(field_info.field_info, "examples") and field_info.field_info.examples:
+        return click.Choice(field_info.field_info.examples)
 
     # Check for numeric constraints and create click.Range
     if field_type in (int, float):
         constraints = {}
 
         # Extract constraints from field_info.metadata
-        if hasattr(field_info, "metadata") and field_info.metadata:
-            for constraint in field_info.metadata:
+        if hasattr(field_info.field_info, "metadata") and field_info.field_info.metadata:
+            for constraint in field_info.field_info.metadata:
                 constraint_type = type(constraint).__name__
 
                 if constraint_type == "Ge" and hasattr(constraint, "ge"):

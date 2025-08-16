@@ -15,7 +15,7 @@ class InteractiveConfigEditor:
     """A wizard to guide users through setting up their configuration interactively."""
 
     def __init__(self, current_config: AppConfig):
-        self.config = current_config.model_copy(deep=True)  # Work on a copy
+        self.config = current_config.copy(deep=True)  # Work on a copy
 
     def run(self) -> AppConfig:
         """Starts the interactive configuration wizard."""
@@ -50,7 +50,7 @@ class InteractiveConfigEditor:
         """Generates prompts for all fields in a given config section."""
         print(f"\n--- [bold magenta]{section_name.title()} Settings[/bold magenta] ---")
 
-        for field_name, field_info in section_model.model_fields.items():
+        for field_name, field_info in section_model.__fields__.items():
             # Skip complex multi-line fields as agreed
             if section_name == "fzf" and field_name in ["opts", "header_ascii_art"]:
                 continue
@@ -79,7 +79,7 @@ class InteractiveConfigEditor:
         """Creates the appropriate InquirerPy prompt for a given Pydantic field."""
         field_type = field_info.annotation
         help_text = textwrap.fill(
-            field_info.description or "No description available.", width=80
+            field_info.field_info.description or "No description available.", width=80
         )
         message = f"{field_name.replace('_', ' ').title()}:"
 

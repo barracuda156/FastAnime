@@ -62,7 +62,7 @@ class MediaRegistryService:
         if self._index_file.exists():
             with self._index_file.open("r", encoding="utf-8") as f:
                 data = json.load(f)
-            self._index = MediaRegistryIndex.model_validate(data)
+            self._index = MediaRegistryIndex(**data)
         else:
             self._index = MediaRegistryIndex()
             self._save_index(self._index)
@@ -81,7 +81,7 @@ class MediaRegistryService:
         with self._lock:
             index.last_updated = datetime.now()
             with AtomicWriter(self._index_file) as f:
-                json.dump(index.model_dump(mode="json"), f, indent=2)
+                f.write(index.json(indent=2))
 
             logger.debug("saved registry index")
 
@@ -107,7 +107,7 @@ class MediaRegistryService:
 
         data = json.load(record_file.open(mode="r", encoding="utf-8"))
 
-        record = MediaRecord.model_validate(data)
+        record = MediaRecord(**data)
 
         # logger.debug(f"Loaded media record for {media_id}")
         return record
@@ -141,7 +141,7 @@ class MediaRegistryService:
             record_file = self._get_media_file_path(media_id)
 
             with AtomicWriter(record_file) as f:
-                json.dump(record.model_dump(mode="json"), f, indent=2, default=str)
+                f.write(record.json(indent=2))
 
             logger.debug(f"Saved media record for {media_id}")
             return True

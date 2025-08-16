@@ -74,7 +74,8 @@ class NotificationType(Enum):
 
 # MODELS
 class BaseMediaApiModel(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    class Config:
+        frozen=True
 
 
 class MediaImage(BaseMediaApiModel):
@@ -871,3 +872,5 @@ class MediaYear(Enum):
     _2023 = "2023"
     _2024 = "2024"
     _2025 = "2025"
+
+MediaTagItem.update_forward_refs()

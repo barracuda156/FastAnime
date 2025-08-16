@@ -301,7 +301,7 @@ def search(config: AppConfig, **options: "Unpack[SearchOptions]"):
 
         if dump_json:
             # Use Pydantic's built-in serialization
-            print(json.dumps(search_result.model_dump(mode="json")))
+            print(search_result.json())
         else:
             # Launch interactive session for browsing results
             from ....interactive.session import session

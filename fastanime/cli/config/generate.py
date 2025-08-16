@@ -43,13 +43,13 @@ def generate_config_ini_from_app_model(app_model: AppConfig) -> str:
     config_ini_content = [CONFIG_HEADER]
 
     for section_name, section_model in app_model:
-        section_comment = section_model.model_config.get("title", "")
+        section_comment = getattr(section_model.__config__, "title", "")
 
         config_ini_content.append(f"\n#\n# {section_comment}\n#")
         config_ini_content.append(f"[{section_name}]")
 
-        for field_name, field_info in section_model.model_fields.items():
-            description = field_info.description or ""
+        for field_name, field_info in section_model.__fields__.items():
+            description = field_info.field_info.description or ""
             if description:
                 wrapped_comment = textwrap.fill(
                     description,

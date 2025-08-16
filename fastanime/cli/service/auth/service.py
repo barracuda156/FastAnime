@@ -43,11 +43,11 @@ class AuthService:
 
         with self.path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-            self._auth = AuthModel.model_validate(data)
+            self._auth = AuthModel(**data)
             return self._auth
 
     def _save_auth(self, auth: AuthModel):
         with self._lock:
             with AtomicWriter(self.path) as f:
-                json.dump(auth.model_dump(), f, indent=2)
+                f.write(auth.json(indent=2))
             logger.info(f"Successfully saved user credentials to {self.path}")

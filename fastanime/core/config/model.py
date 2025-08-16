@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseModel, Field, PrivateAttr, computed_field
+from pydantic import BaseModel, Field, PrivateAttr
 
 from ...libs.media_api.types import MediaSort, UserMediaListSort
 from ...libs.provider.anime.types import ProviderName, ProviderServer
@@ -347,12 +347,10 @@ class FzfConfig(OtherConfig):
         if header_ascii_art:
             self._header_ascii_art = header_ascii_art
 
-    @computed_field(description=desc.FZF_OPTS)
     @property
     def opts(self) -> str:
         return "\n" + "\n".join([f"\t{line}" for line in self._opts.split()])
 
-    @computed_field(description=desc.FZF_HEADER_ASCII_ART)
     @property
     def header_ascii_art(self) -> str:
         return "\n" + "\n".join(

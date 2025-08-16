@@ -26,4 +26,5 @@ class DownloadResult(BaseModel):
     anime_title: str = Field(description="Title of the anime")
     episode_title: str = Field(description="Title of the episode")
 
-    model_config = {"arbitrary_types_allowed": True}
+    class Config:
+        arbitrary_types_allowed=True

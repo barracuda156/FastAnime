@@ -4,7 +4,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Dict, Literal, Optional
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 from ....core.utils import converter
 from ....libs.media_api.types import MediaItem, UserMediaListStatus
@@ -67,7 +67,6 @@ class MediaRegistryIndexEntry(BaseModel):
     start_date: datetime = Field(default_factory=datetime.now)
     completed_at: datetime = Field(default_factory=datetime.now)
 
-    @computed_field
     @property
     def watch_completion_percentage(self) -> float:
         """Watch completion percentage."""
@@ -85,7 +84,6 @@ class MediaRegistryIndex(BaseModel):
 
     media_index: Dict[str, MediaRegistryIndexEntry] = Field(default_factory=dict)
 
-    @computed_field
     @property
     def status_breakdown(self) -> Dict[str, int]:
         """Get breakdown by user status."""
@@ -94,7 +92,6 @@ class MediaRegistryIndex(BaseModel):
             breakdown[entry.status.value] = breakdown.get(entry.status.value, 0) + 1
         return breakdown
 
-    @computed_field
     @property
     def media_count_breakdown(self) -> Dict[str, int]:
         breakdown = {}
@@ -102,7 +99,6 @@ class MediaRegistryIndex(BaseModel):
             breakdown[entry.media_api] = breakdown.get(entry.media_api, 0) + 1
         return breakdown
 
-    @computed_field
     @property
     def media_count(self) -> int:
         """Get the number of media."""

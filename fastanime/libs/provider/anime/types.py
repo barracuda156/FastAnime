@@ -37,7 +37,8 @@ class MediaTranslationType(Enum):
 
 # MODELS
 class BaseAnimeProviderModel(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    class Config:
+        frozen=True
 
 
 class PageInfo(BaseAnimeProviderModel):
