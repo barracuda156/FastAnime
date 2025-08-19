@@ -104,7 +104,7 @@ class ConfigLoader:
                     config_dict[section] = values
 
         try:
-            app_config = AppConfig.model_validate(config_dict)
+            app_config = AppConfig(**config_dict)
             return app_config
         except ValidationError as e:
             error_message = (

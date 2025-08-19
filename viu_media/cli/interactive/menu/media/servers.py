@@ -102,7 +102,7 @@ def servers(ctx: Context, state: State) -> State | InternalDirective:
     return State(
         menu_name=MenuName.PLAYER_CONTROLS,
         media_api=state.media_api,
-        provider=state.provider.model_copy(
+        provider=state.provider.copy(
             update={
                 "servers_": server_map,
                 "server_name_": selected_server.name,

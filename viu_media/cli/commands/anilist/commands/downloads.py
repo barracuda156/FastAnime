@@ -107,7 +107,7 @@ def downloads(
         return
 
     if output_json:
-        print(json.dumps(result.model_dump(mode="json"), indent=2))
+        print(result.json(indent=2))
         return
 
     from ....interactive.session import session

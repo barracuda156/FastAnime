@@ -65,7 +65,7 @@ class SessionsService:
     def _save_session(self, session: Session):
         path = self.dir / f"{session.name}.json"
         with AtomicWriter(path) as f:
-            json.dump(session.model_dump(mode="json", by_alias=True), f)
+            f.write(session.json(by_alias=True))
 
     def _load_session(self, session_name: str) -> Optional[Session]:
         path = self.dir / f"{session_name}.json"
@@ -75,7 +75,7 @@ class SessionsService:
 
         with path.open("r", encoding="utf-8") as f:
             data = json.load(f)
-            session = Session.model_validate(data)
+            session = Session(**data)
 
         logger.info(f"Session loaded from {path} with {session.state_count} states")
         return session

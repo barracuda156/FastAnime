@@ -51,7 +51,8 @@ class InternalDirective(Enum):
 
 
 class StateModel(BaseModel):
-    model_config = ConfigDict(frozen=True)
+    class Config:
+        frozen=True
 
 
 class MediaApiState(StateModel):

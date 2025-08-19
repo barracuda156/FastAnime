@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field
 
 from ...interactive.state import State
 
@@ -16,7 +16,6 @@ class Session(BaseModel):
     description: Optional[str] = None
     is_from_crash: bool = False
 
-    @computed_field
     @property
     def state_count(self) -> int:
         return len(self.history)

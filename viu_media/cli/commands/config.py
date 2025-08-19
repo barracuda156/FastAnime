@@ -93,7 +93,7 @@ def config(
     elif view_json:
         import json
 
-        print(json.dumps(user_config.model_dump(mode="json")))
+        print(user_config.json())
     elif generate_desktop_entry:
         _generate_desktop_entry()
     elif interactive:

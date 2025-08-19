@@ -6,8 +6,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal, get_args, get_origin
 
-from pydantic.fields import ComputedFieldInfo, FieldInfo
-from pydantic_core import PydanticUndefined
+from pydantic.fields import FieldInfo
 
 from ...core.config import AppConfig
 from ...core.constants import APP_ASCII_ART, CLI_NAME, DISCORD_INVITE, REPO_HOME
@@ -49,17 +48,14 @@ def generate_config_toml_from_app_model(app_model: AppConfig) -> str:
     config_content_parts = [CONFIG_HEADER]
 
     for section_name, section_model in app_model:
-        section_title = section_model.model_config.get("title", section_name.title())
+        section_title = getattr(section_model.__config__, "title", section_name.title())
 
         config_content_parts.append(f"\n#\n# {section_title}\n#")
         config_content_parts.append(f"[{section_name}]")
 
-        for field_name, field_info in itertools.chain(
-            section_model.model_fields.items(),
-            section_model.model_computed_fields.items(),
-        ):
+        for field_name, field_info in section_model.__fields__.items():
             # --- Generate Comments ---
-            description = field_info.description or ""
+            description = field_info.field_info.description or ""
             if description:
                 wrapped_comment = textwrap.fill(
                     description,
@@ -81,7 +77,7 @@ def generate_config_toml_from_app_model(app_model: AppConfig) -> str:
 
             if (
                 hasattr(field_info, "default")
-                and field_info.default is not PydanticUndefined
+                and field_info.default is not None
             ):
                 default_val = (
                     field_info.default.value
@@ -138,13 +134,9 @@ def _format_toml_value(value: Any) -> str:
     return f'"{str(value)}"'
 
 
-def _get_field_type_comment(field_info: FieldInfo | ComputedFieldInfo) -> str:
+def _get_field_type_comment(field_info: FieldInfo) -> str:
     """Generate a comment with type information for a field."""
-    field_type = (
-        field_info.annotation
-        if isinstance(field_info, FieldInfo)
-        else field_info.return_type
-    )
+    field_type = field_info.type_
 
     possible_values = []
     if field_type is not None:
